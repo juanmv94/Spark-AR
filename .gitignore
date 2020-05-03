@@ -1,4 +1,5 @@
 *.msi
 tsconfig.json
 /Instagram/Construction
+/SparkAR-clients
 /util/FaceTrackingRecording

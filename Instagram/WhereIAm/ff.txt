@@ -1,0 +1,1 @@
+ffmpeg -ss 1 -i original.mkv -r 15 -vf crop=456:800:700:4 o%d.png
