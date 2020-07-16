@@ -10,9 +10,17 @@ const NativeUI = require('NativeUI');
 const picker = NativeUI.picker;
 
 const sharpness=256;
-
-const mat=Materials.get('material0')
-const cameraColor = Textures.get('cameraTexture0').signal
+var mat,cameraColor;
+Promise.all([Materials.findFirst('material0'),Textures.findFirst('cameraTexture0'),Textures.findFirst("galleryTexture0")]).then(function(pr){
+	mat=pr[0]
+	cameraColor=pr[1].signal
+	pr[2].state.monitor().subscribe(function(x){
+		cameraColor=pr[2].signal
+		inicializaPar(1)
+	})
+	inicializaPar(1)
+	picker.visible = true
+})
 const uv = Shaders.fragmentStage(Shaders.vertexAttribute({ variableName: Shaders.VertexAttribute.TEX_COORDS }))
 
 //const resol = R.pack2(CameraInfo.previewSize.width, CameraInfo.previewSize.height)
@@ -102,7 +110,7 @@ function inicializa(nresx,nresy,ntime,nmovs,vmovs) {
 		finalColor=(finalColor==null) ? newtex : Shaders.blend(finalColor,newtex,{mode: Shaders.BlendMode.NORMAL})
 	}
 	finalColor=Shaders.blend(finalColor,R.pack4(0,0,0,1),{mode: Shaders.BlendMode.NORMAL})
-	mat.setTexture(finalColor, { textureSlotName: Shaders.DefaultMaterialTextures.DIFFUSE })
+	mat.setTextureSlot(Shaders.DefaultMaterialTextures.DIFFUSE, finalColor)
 	timeDriver.start()
 }
 
@@ -131,6 +139,3 @@ picker.configure({
 picker.selectedIndex.monitor().subscribe(function(index) {
   inicializaPar(index.newValue);
 });
-
-inicializaPar(1)
-picker.visible = true;

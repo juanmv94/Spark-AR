@@ -3,11 +3,11 @@ const Patches = require('Patches');
 var puntos=0;
 
 function printPuntos() {
-	Patches.setStringValue("points",dos_digitos(puntos));
+	Patches.inputs.setString("points",dos_digitos(puntos));
 }
 
 printPuntos();
-Patches.setStringValue("tiempo","0:10");
+Patches.inputs.setString("tiempo","0:10");
 
 function dos_digitos(num) 
 {
@@ -15,27 +15,27 @@ function dos_digitos(num)
 	else return num.toString();
 }
 
-Patches.getScalarValue("segundos").monitor().subscribe(function(event) {
+Patches.outputs.getScalar("segundos").then(function(seg) {seg.monitor().subscribe(function(event) {
 	var segundos=event.newValue;
 	var s=segundos%60;
 	var m=(segundos-s)/60;
-	Patches.setStringValue("tiempo",(m+":"+dos_digitos(s)));
-});
+	Patches.inputs.setString("tiempo",(m+":"+dos_digitos(s)));
+});});
 
-Patches.getScalarValue("puntos").monitor().subscribe(function(event) {
+Patches.outputs.getScalar("puntos").then(function(pun) {pun.monitor().subscribe(function(event) {
 	puntos=event.newValue;
 	printPuntos();
-});
+});});
 
 function calcSpeed(visible,vx,vy,sx,sy) {
 	if (visible) {
-		Patches.setScalarValue(vx,15+(Math.random()+0.6)*puntos*1.4);
-		Patches.setScalarValue(vy,15+(Math.random()+0.6)*puntos*1.4);
-		Patches.setScalarValue(sx,Math.random());
-		Patches.setScalarValue(sy,Math.random());
+		Patches.inputs.setScalar(vx,15+(Math.random()+0.6)*puntos*1.4);
+		Patches.inputs.setScalar(vy,15+(Math.random()+0.6)*puntos*1.4);
+		Patches.inputs.setScalar(sx,Math.random());
+		Patches.inputs.setScalar(sy,Math.random());
 	} else {
-		Patches.setScalarValue(vx,-1);
-		Patches.setScalarValue(vy,-1);
+		Patches.inputs.setScalar(vx,-1);
+		Patches.inputs.setScalar(vy,-1);
 	}
 }
 
@@ -43,14 +43,14 @@ calcSpeed(false,"vx1","vy1","sx1","sy1");
 calcSpeed(false,"vx2","vy2","sx2","sy2");
 calcSpeed(false,"vx3","vy3","sx3","sy3");
 
-Patches.getBooleanValue("visible1").monitor().subscribe(function(event) {
+Patches.outputs.getBoolean("visible1").then(function(v) {v.monitor().subscribe(function(event) {
 	calcSpeed(event.newValue,"vx1","vy1","sx1","sy1");
-});
+});});
 
-Patches.getBooleanValue("visible2").monitor().subscribe(function(event) {
+Patches.outputs.getBoolean("visible2").then(function(v) {v.monitor().subscribe(function(event) {
 	calcSpeed(event.newValue,"vx2","vy2","sx2","sy2");
-});
+});});
 
-Patches.getBooleanValue("visible3").monitor().subscribe(function(event) {
+Patches.outputs.getBoolean("visible3").then(function(v) {v.monitor().subscribe(function(event) {
 	calcSpeed(event.newValue,"vx3","vy3","sx3","sy3");
-});
+});});

@@ -1,0 +1,1 @@
+REG DELETE "HKCU\SOFTWARE\Facebook\Spark AR Studio\_gks" /f

@@ -16,21 +16,7 @@ const sonidos=["boton","block","terminado"].reduce(function(a,b){a[b]=Audio.getP
 const tamPuzzle=0.8;
 const sepBloque=0.5;
 
-const placer=Scene.root.child("planeTracker0").child("placer");
-const pplataformas=placer.child("plataformas");
-const plataformas=new Array(256);
-for (let i=0;i<256;i++) plataformas[i]=pplataformas.child("p"+i);
-for (let i=0;i<256;i++) TouchGestures.onTap(plataformas[i]).subscribe(function(){plTouch(i);});
-const ppiezas=placer.child("bloques");
-const piezas=new Array(128);
-for (let i=0;i<128;i++) piezas[i]=ppiezas.child("b"+i);
-const posicionespiezas=new Array(128);
-for (let i=0;i<128;i++) TouchGestures.onTap(piezas[i]).subscribe(function(){piTouch(i);});
-const materiales=new Array(128);
-for (let i=0;i<128;i++) materiales[i]=Materials.get("material"+i);
-const materialCajaT=Materials.get("materialCajaT");
-for (let i=0;i<128;i++) piezas[i].child("c5").material=materiales[i];
-const animacionesp=new Array(128);
+const animacionesp=new Array(128), posicionespiezas=new Array(128);
 const linearSampler = Animation.samplers.easeInOutQuad(0,1);
 for (let i=0;i<128;i++) {
 	var timeDriver = Animation.timeDriver({durationMilliseconds: 300});
@@ -38,6 +24,23 @@ for (let i=0;i<128;i++) {
 	animacionesp[i]={td:timeDriver, tl:timeline};
 }
 
+export var materiales,plataformas,piezas;
+const materialesP=Promise.all([...Array(128).keys()].map(function(n){return Materials.findFirst("material"+n);}));
+const placerP=Scene.root.findFirst("placer");
+placerP.then(function(placer) {
+	Promise.all([placer.findFirst("plataformas",{recursive:false}), placer.findFirst("bloques",{recursive:false})]).then(function(placerChild) {
+		var plataformasP=Promise.all([...Array(256).keys()].map(function(n){return placerChild[0].findFirst("p"+n,{recursive:false});}));
+		var piezasP=Promise.all([...Array(128).keys()].map(function(n){return placerChild[1].findFirst("b"+n,{recursive:false});}));
+		Promise.all([materialesP,plataformasP,piezasP]).then(function(arr) {
+			materiales=arr[0]; plataformas=arr[1], piezas=arr[2];
+			for (let i=0;i<256;i++) TouchGestures.onTap(plataformas[i]).subscribe(function(){plTouch(i);});
+			for (let i=0;i<128;i++) TouchGestures.onTap(piezas[i]).subscribe(function(){piTouch(i);});
+			for (let i=0;i<128;i++) piezas[i].findFirst("c5").then(function(c){c.material=materiales[i];});
+			inicializaPuzzle(0);
+			picker.visible = true;
+		});
+	});
+});
 var piezaSeleccionada=null;
 var terminado;
 
@@ -70,12 +73,14 @@ function texturizaPiezas(t) {
 	for (let i=0;i<anchoPuzzle;i++) for (let j=0;j<altoPuzzle;j++) {
 		var newtex=Shaders.textureSampler(t,newuv.add(R.pack2(i/anchoPuzzle,j/altoPuzzle)));
 		newtex=Shaders.blend(bordersPieza[nm],newtex,{mode: Shaders.BlendMode.NORMAL});
-		materiales[nm++].setTexture(newtex, { textureSlotName: Shaders.DefaultMaterialTextures.DIFFUSE });
+		materiales[nm++].setTextureSlot(Shaders.DefaultMaterialTextures.DIFFUSE,newtex);
 	}
 	//Caja
 	var p=anchoPuzzle/altoPuzzle*8/10;
 	var newuv=(p>=1) ? uv.add(R.pack2(0,-0.5)).mul(R.pack2(1,p)).add(R.pack2(0,0.5)) : uv.add(R.pack2(-0.5,0)).mul(R.pack2(1/p,1)).add(R.pack2(0.5,0));
-	materialCajaT.setTexture(Shaders.textureSampler(t,newuv).add(R.pack4(0.1,0.1,0.1,0)), { textureSlotName: Shaders.DefaultMaterialTextures.DIFFUSE });
+	Materials.findFirst("materialCajaT").then(function(materialCajaT){
+		materialCajaT.setTextureSlot(Shaders.DefaultMaterialTextures.DIFFUSE, Shaders.textureSampler(t,newuv).add(R.pack4(0.1,0.1,0.1,0)));
+	});
 	
 }
 
@@ -133,26 +138,31 @@ function inicializaPuzzle(index) {
 	anchoPuzzle=puzzles[index].x;
 	altoPuzzle=puzzles[index].y;
 	tamBloque=tamPuzzle/Math.min(anchoPuzzle,altoPuzzle);
-	texturizaPiezas(Textures.get(puzzles[index].t).signal.mul(borderPuzzle));
-	plataforma();
+	Textures.findFirst(puzzles[index].t).then(function(texp) {
+		texturizaPiezas(texp.signal.mul(borderPuzzle));
+		plataforma();
+	});
 }
 
 //////Pantalla Iphone
-const pantalla=placer.child("caja").child("iph").child("pantalla");
 const defigdesp=-0.155;
 const defigdmul=0.5;
-const ig1=Textures.get("ig1").signal;
-const ig2=Textures.get("ig2").signal;
 
-const iguv=uv.mul(R.pack2(1,defigdmul)).add(R.pack2(0,Patches.getScalarValue("iphscryo").add(defigdesp))).mod(1);
-var newtex=Shaders.textureSampler(ig2,iguv);
-newtex=Shaders.blend(ig1,newtex,{mode: Shaders.BlendMode.NORMAL});
-Materials.get("materialPantalla").setTexture(newtex, { textureSlotName: Shaders.DefaultMaterialTextures.DIFFUSE });
-
-TouchGestures.onPan(pantalla).subscribe(function(gesture){
-	var prev=Patches.getScalarValue("iphscryo").pinLastValue()-defigdesp;
-	Patches.setScalarValue("iphscry",R.max(0,gesture.translation.y.div(-512).add(prev)));
+Promise.all([Textures.findFirst("ig1"),Textures.findFirst("ig2"),Patches.outputs.getScalar("iphscryo")]).then(function(ig) {
+	const iguv=uv.mul(R.pack2(1,defigdmul)).add(R.pack2(0,ig[2].add(defigdesp))).mod(1);
+	var newtex=Shaders.textureSampler(ig[1].signal,iguv);
+	newtex=Shaders.blend(ig[0].signal,newtex,{mode: Shaders.BlendMode.NORMAL});
+	Materials.findFirst("materialPantalla").then(function(mp){mp.setTextureSlot(Shaders.DefaultMaterialTextures.DIFFUSE,newtex);});
 });
+
+placerP.then(function(placer){placer.findFirst("pantalla").then(function(pantalla) {
+	Patches.outputs.getScalar("iphscryo").then(function(scal){
+		TouchGestures.onPan(pantalla).subscribe(function(gesture){
+			var prev=scal.pinLastValue()-defigdesp;
+			Patches.inputs.setScalar("iphscry",R.max(0,gesture.translation.y.div(-512).add(prev)));
+		});
+	});
+});});
 
 ///////Dinamica
 function piTouch(n) {
@@ -189,7 +199,7 @@ function verificaTerminado() {
 	terminado=true;
 	sonidos.terminado.reset();
 	sonidos.terminado.setPlaying(true);
-	Patches.setPulseValue("finished",R.once());
+	Patches.inputs.setPulse("finished",R.once());
 }
 
 //Picker
@@ -202,6 +212,3 @@ picker.configure({
 picker.selectedIndex.monitor().subscribe(function(index) {
   inicializaPuzzle(index.newValue);
 });
-
-inicializaPuzzle(0);
-picker.visible = true;

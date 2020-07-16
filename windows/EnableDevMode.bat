@@ -1,0 +1,1 @@
+REG ADD "HKCU\SOFTWARE\Facebook\Spark AR Studio\_gks" /v "skylight_developer_menu_allowed" /t REG_SZ /d 1
