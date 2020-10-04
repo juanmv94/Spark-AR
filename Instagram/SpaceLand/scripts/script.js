@@ -115,8 +115,8 @@ function fint() {
 	}
 	nr=(nr+nrv)%(2*Math.PI);
 	
-	nave.transform.x=xs.mul(-posx);
-	nave.transform.y=ys.mul(-posy);
+	nave.transform.x=xs.mul(0.5-posx);
+	nave.transform.y=ys.mul(0.5-posy);
 	nave.transform.rotationY=nr;
 	nave.transform.scaleX=xs.mul(tamNave);
 	nave.transform.scaleY=ys.mul(tamNave*propNave);
