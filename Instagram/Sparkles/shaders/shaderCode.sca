@@ -1,0 +1,22 @@
+//==============================================================================
+// Welcome to shader authoring in Spark AR Studio!
+//==============================================================================
+
+#import <gradients>
+#import <sdf>
+
+vec2 scal(vec2 inp, float s) {
+	if (s<0.2) return vec2(0,0);
+	return clamp((inp-0.5)/s+0.5,0.0,1.0);
+}
+
+function<vec4(vec2)> main(function<vec4(vec2)>sparkle, function<vec4(vec2)>sob, float d) {
+	vec2 resolution = std::getRenderTargetSize();
+	vec2 resadj=vec2(1,resolution.y/resolution.x);
+    // Creating and returning a lambda function
+    return [](vec2 uv) {
+		vec4 sobpixel=sob(floor(fragment(uv*resadj*d))/(resadj*d)+(1.0/(resadj*d*2.0)));
+		float sobval=(sobpixel.r+sobpixel.g+sobpixel.b)/3.0;
+		return sparkle(scal(mod(fragment(uv*resadj*d),1.0),sobval));
+	};
+}

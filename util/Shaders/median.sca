@@ -1,0 +1,60 @@
+//==============================================================================
+// Welcome to shader authoring in Spark AR Studio!
+//==============================================================================
+
+/*
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+*/
+
+#define size 1
+#define sizediam (2*size+1)
+#define area (sizediam*sizediam)
+#define dist 0.002
+
+
+vec4 vecfori(int i,function<vec4(vec2)> tex, vec2 uv) {
+	int div=i/sizediam;
+	int x=i-(div*sizediam)-size;
+	int y=div-size;
+	return tex(uv+vec2(x,y)*dist);
+}
+
+float vfori(int i,function<vec4(vec2)> tex, vec2 uv) {
+	int div=i/sizediam;
+	int x=i-(div*sizediam)-size;
+	int y=div-size;
+	vec4 v=tex(uv+vec2(x,y)*dist);
+	return v.r+v.g+v.b;
+}
+
+function<vec4(vec2)> median(function<vec4(vec2)> tex) {
+    // Creating and returning a lambda function
+    return [](vec2 uv) {
+		float o[area];
+		for (int i=0;i<area;i++) o[i]=vfori(i,tex,uv);
+		int indexes[area];
+		for (int i=0;i<area;i++) indexes[i]=i;
+		 
+		//Insertion sort
+		int i, j;
+		int key;
+		for (i = 1; i < area; i++)
+		{
+			key = indexes[i];
+			j = i - 1;
+			/* Move elements of arr[0..i-1], that are
+			greater than key, to one position ahead
+			of their current position */
+			while (j >= 0 && o[indexes[j]] > o[key]) {
+				indexes[j+1] = indexes[j];
+				j--;
+			}
+			indexes[j+1] = key;
+		}
+		///////////
+		
+		return vecfori(indexes[area/2],tex,uv);
+    };
+ }

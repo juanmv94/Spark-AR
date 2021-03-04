@@ -7,18 +7,18 @@ const defIndex=Math.floor(Math.random()*7);
 
 slider.value=0.5;
 slider.value.monitor().subscribe(function(v) {
-	Patches.setScalarValue("slider",v.newValue);
+	Patches.inputs.setScalar("slider",v.newValue);
 });
-Patches.setScalarValue("slider",0.5);
+Patches.inputs.setScalar("slider",0.5);
 
 picker.configure({
   selectedIndex: defIndex,
   items: [{image_texture: 'c1'},{image_texture: 'c2'},{image_texture: 'c3'},{image_texture: 'c4'},{image_texture: 'c5'},{image_texture: 'c6'},{image_texture: 'c7'}]
 });
 picker.selectedIndex.monitor().subscribe(function(v) {
-  Patches.setScalarValue("color",colorMap[v.newValue]);
+  Patches.inputs.setScalar("color",colorMap[v.newValue]);
 });
-Patches.setScalarValue("color",colorMap[defIndex]);
+Patches.inputs.setScalar("color",colorMap[defIndex]);
 
 slider.visible=true;
 picker.visible=true;

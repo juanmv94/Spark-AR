@@ -8,7 +8,9 @@ function charCode(v) {return v.charCodeAt(0)-32;}
 
 NativeUI.setText('text0',texto);
 
-Patches.getPulseValue("tap").subscribe(function() {NativeUI.enterTextEditMode('text0');});
+Patches.outputs.getPulse("tap").then(function(t) {
+	t.subscribe(function() {NativeUI.enterTextEditMode('text0');});
+});
 
 NativeUI.getText('text0').monitor().subscribe(function(textUpdate){
   if (textUpdate.newValue=='') {texto='';Patches.setBooleanValue("Modo",false);}
@@ -20,9 +22,11 @@ NativeUI.getText('text0').monitor().subscribe(function(textUpdate){
   }
 });
 
-Patches.getScalarValue("TextAnim").monitor().subscribe(function(estado){
-  if (texto=='') return;
-  var c=texto[tpointer++];
-  if (tpointer==texto.length) tpointer=0;
-  Patches.setScalarValue("ch"+(6-estado.newValue),charCode(c));
+Patches.outputs.getScalar("TextAnim").then(function(ta) {
+	ta.monitor().subscribe(function(estado){
+		if (texto=='') return;
+		var c=texto[tpointer++];
+		if (tpointer==texto.length) tpointer=0;
+		Patches.setScalarValue("ch"+(6-estado.newValue),charCode(c));
+	});
 });

@@ -6,18 +6,15 @@ const picker = NativeUI.picker;
 const defaultIndex = 0;
 const nopciones=4;
 
-var configuration = {
-  selectedIndex: defaultIndex,
-  items: []
-};
-
-for (let i=1;i<=nopciones;i++) {
-	configuration.items.push({image_texture: Textures.get(""+i)});
-}
-
-picker.configure(configuration);
-picker.visible = true;
+Promise.all([...Array(nopciones).keys()].map(i=>Textures.findFirst(""+(i+1)))).then(function(t) {
+	var configuration = {
+	  selectedIndex: defaultIndex,
+	  items: t.map(i=>{return {image_texture:i};})
+	};
+	picker.configure(configuration);
+	picker.visible = true;
+});
 
 picker.selectedIndex.monitor().subscribe(function(index) {
-  Patches.setScalarValue("opcion",index.newValue);
+  Patches.inputs.setScalar("opcion",index.newValue);
 });

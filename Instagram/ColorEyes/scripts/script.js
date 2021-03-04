@@ -6,21 +6,21 @@ const picker = NativeUI.picker;
 const slider = NativeUI.slider;
 
 slider.value=0.25;
-Patches.setScalarValue("eyesize",slider.value);
+Patches.inputs.setScalar("eyesize",slider.value);
 slider.visible=true;
 
-const eyetextures=["green","blue","red","purple","brown","magic","heart","cat"].map(function(x){return Textures.get(x);});
+Materials.findFirst('material0').then(material=>{
+	Promise.all(["green","blue","red","purple","brown","magic","heart","cat"].map(x=>Textures.findFirst(x))).then(eyetextures=>{
+		var configuration = {
+		  selectedIndex: 0,
+		  items: eyetextures.map(function(x){return {image_texture:x};})
+		};
 
-var configuration = {
-  selectedIndex: 0,
-  items: eyetextures.map(function(x){return {image_texture:x};})
-};
+		picker.selectedIndex.monitor().subscribe(function(index) {
+		  material.diffuse=eyetextures[index.newValue];
+		});
 
-const material = Materials.get('material0');
-
-picker.selectedIndex.monitor().subscribe(function(index) {
-  material.diffuse=eyetextures[index.newValue];
+		picker.configure(configuration);
+		picker.visible = true;
+	});
 });
-
-picker.configure(configuration);
-picker.visible = true;
