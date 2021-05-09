@@ -1,0 +1,116 @@
+#import <color_spaces>
+
+function<vec4(vec2)> main(function<vec4(vec2)> ctex, vec2 pointpos, function<vec4(vec2)> dtex, function<vec4(vec2)> ntex) {
+    // Creating and returning a lambda function
+    return [](vec2 uv) {
+		if (uv.y<=(2.0/32.0)) {
+			return dtex(uv);
+		} else if (uv.y<=(7.0/32.0)) {	//HUE
+			float h=min(std::rgbToHsv(ctex(pointpos).rgb).x,0.999);
+			if (uv.x>=(6.0/32.0) && uv.x<=(11.0/32.0)) {
+				vec4 c=vec4(0,0,0,1);
+				c.rgb=std::hsvToRgb(vec3(h,1,1));
+				return c;
+			} else if (uv.x>=(14.0/32.0)) {
+				if (uv.x<(16.0/32.0)) {
+					vec2 dpos=uv-vec2((14.0/32.0),(2.0/32.0));
+					vec2 desp=vec2(floor(h*10.0)/16.0,0);
+					return ntex(dpos+desp);
+				} else if (uv.x<(18.0/32.0)) {
+					vec2 dpos=uv-vec2((16.0/32.0),(2.0/32.0));
+					vec2 desp=vec2(floor(mod(h*10.0,1.0)*10.0)/16.0,0);
+					return ntex(dpos+desp);
+				} else {
+					return dtex(uv);
+				}
+			} else {
+				return dtex(uv);
+			}
+		} else if (uv.y<=(9.0/32.0)) {
+			return dtex(uv);
+		} else if (uv.y<=(14.0/32.0)) {	//SAT
+			float s=min(std::rgbToHsv(ctex(pointpos).rgb).y,0.999);
+			if (uv.x>=(6.0/32.0) && uv.x<(11.0/32.0)) {
+				vec4 c=vec4(0,0,0,1);
+				c.rgb=std::hsvToRgb(vec3((uv.x-(6.0/32.0))*6.0,s,0.5+s*0.5));
+				return c;
+			} else if (uv.x>=(14.0/32.0)) {
+				if (uv.x<(16.0/32.0)) {
+					vec2 dpos=uv-vec2((14.0/32.0),(9.0/32.0));
+					vec2 desp=vec2(floor(s*10.0)/16.0,0);
+					return ntex(dpos+desp);
+				} else if (uv.x<(18.0/32.0)) {
+					vec2 dpos=uv-vec2((16.0/32.0),(9.0/32.0));
+					vec2 desp=vec2(floor(mod(s*10.0,1.0)*10.0)/16.0,0);
+					return ntex(dpos+desp);
+				} else {
+					return dtex(uv);
+				}
+			} else {
+				return dtex(uv);
+			}
+		} else if (uv.y<=(16.0/32.0)) {
+			return dtex(uv);
+		} else if (uv.y<=(21.0/32.0)) {	//LUM
+			float l=min(std::rgbToHsl(ctex(pointpos).rgb).z,0.999);
+			if (uv.x>=(6.0/32.0) && uv.x<=(11.0/32.0)) {
+				return vec4(l,l,l,1);
+			} else if (uv.x>=(14.0/32.0)) {
+				if (uv.x<(16.0/32.0)) {
+					vec2 dpos=uv-vec2((14.0/32.0),(16.0/32.0));
+					vec2 desp=vec2(floor(l*10.0)/16.0,0);
+					return ntex(dpos+desp);
+				} else if (uv.x<(18.0/32.0)) {
+					vec2 dpos=uv-vec2((16.0/32.0),(16.0/32.0));
+					vec2 desp=vec2(floor(mod(l*10.0,1.0)*10.0)/16.0,0);
+					return ntex(dpos+desp);
+				} else {
+					return dtex(uv);
+				}
+			} else {
+				return dtex(uv);
+			}
+		} else if (uv.y<=(25.0/32.0)) {
+			return dtex(uv);
+		} else if (uv.y<=(30.0/32.0)) {	//HEX
+			if (uv.x>=(6.0/32.0) && uv.x<(11.0/32.0)) {
+				return ctex(pointpos);
+			} else if (uv.x>=(15.0/32.0)) {
+				float r=min(ctex(pointpos).r,0.999);
+				float g=min(ctex(pointpos).g,0.999);
+				float b=min(ctex(pointpos).b,0.999);
+				if (uv.x<(17.0/32.0)) {
+					vec2 dpos=uv-vec2((15.0/32.0),(25.0/32.0));
+					vec2 desp=vec2(floor(r*16.0)/16.0,0);
+					return ntex(dpos+desp);
+				} else if (uv.x<(19.0/32.0)) {
+					vec2 dpos=uv-vec2((17.0/32.0),(25.0/32.0));
+					vec2 desp=vec2(floor(mod(r*16.0,1.0)*16.0)/16.0,0);
+					return ntex(dpos+desp);
+				} else if (uv.x<(21.0/32.0)) {
+					vec2 dpos=uv-vec2((19.0/32.0),(25.0/32.0));
+					vec2 desp=vec2(floor(g*16.0)/16.0,0);
+					return ntex(dpos+desp);
+				} else if (uv.x<(23.0/32.0)) {
+					vec2 dpos=uv-vec2((21.0/32.0),(25.0/32.0));
+					vec2 desp=vec2(floor(mod(g*16.0,1.0)*16.0)/16.0,0);
+					return ntex(dpos+desp);
+				} else if (uv.x<(25.0/32.0)) {
+					vec2 dpos=uv-vec2((23.0/32.0),(25.0/32.0));
+					vec2 desp=vec2(floor(b*16.0)/16.0,0);
+					return ntex(dpos+desp);
+				} else if (uv.x<(27.0/32.0)) {
+					vec2 dpos=uv-vec2((25.0/32.0),(25.0/32.0));
+					vec2 desp=vec2(floor(mod(b*16.0,1.0)*16.0)/16.0,0);
+					return ntex(dpos+desp);
+				} else{
+					return dtex(uv);
+				}
+			} else {
+				return dtex(uv);
+			}
+		} else {
+			return dtex(uv);
+		}
+	};
+}

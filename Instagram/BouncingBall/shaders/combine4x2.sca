@@ -1,0 +1,21 @@
+// Shader code by: @Juanmv94
+
+function<vec4(vec2)> combine4x2(function<vec4(vec2)> b00,function<vec4(vec2)> b10,function<vec4(vec2)> b20,function<vec4(vec2)> b30,function<vec4(vec2)> b01,function<vec4(vec2)> b11,function<vec4(vec2)> b21,function<vec4(vec2)> b31) {
+  return [](vec2 uv) {
+	vec2 nuv=uv*vec2(4.0,2.0);
+	if (nuv.y<1.0) {
+		if (nuv.x<2.0) {
+			if (nuv.x>=1.0) return b00(nuv-vec2(1,0));
+			return b10(nuv);
+		}
+		if (nuv.x>=3.0) return b20(nuv-vec2(3.0,0));
+		return b30(nuv-vec2(2.0,0));
+	}
+	if (nuv.x<2.0) {
+		if (nuv.x>=1.0) return b01(nuv-vec2(1,1));
+		return b11(nuv-vec2(0,1));
+	}
+	if (nuv.x>=3.0) return b21(nuv-vec2(3.0,1));
+	return b31(nuv-vec2(2.0,1));
+  };
+}

@@ -12,7 +12,7 @@ const Audio = require('Audio');
 
 const puzzles=[{ico:"46",x:4,y:6},{ico:"58",x:5,y:8},{ico:"610",x:6,y:10}];
 
-const sonidos=["boton","block","terminado"].reduce(function(a,b){a[b]=Audio.getPlaybackController(b);return a},{});
+var sonidos=["boton","block","terminado"];
 const tamPuzzle=0.8;
 const sepBloque=0.5;
 
@@ -27,7 +27,11 @@ for (let i=0;i<60;i++) {
 export var materiales,plataformas,piezas;
 const materialesP=Promise.all([...Array(60).keys()].map(function(n){return Materials.findFirst("material"+n);}));
 const placerP=Scene.root.findFirst("placer");
-placerP.then(function(placer) {
+const sonidosP=Promise.all(sonidos.map(x=>Audio.getAudioPlaybackController(x)));
+Promise.all([placerP,sonidosP]).then(function([placer,son]) {
+	var nsonidos={};
+	for (let i=0;i<sonidos.length;i++) nsonidos[sonidos[i]]=son[i];
+	sonidos=nsonidos;
 	Promise.all([placer.findFirst("plataformas",{recursive:false}), placer.findFirst("bloques",{recursive:false})]).then(function(placerChild) {
 		var plataformasP=Promise.all([...Array(120).keys()].map(function(n){return placerChild[0].findFirst("p"+n,{recursive:false});}));
 		var piezasP=Promise.all([...Array(60).keys()].map(function(n){return placerChild[1].findFirst("b"+n,{recursive:false});}));

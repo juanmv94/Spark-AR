@@ -1,0 +1,25 @@
+// Shader code by: @Juanmv94
+
+//const float bsize=0.1;
+//const float stp=1.0/128.0;
+const float sens=0.1;
+
+vec4 bplogic(float stp, float bsize, float prop, function<vec4(vec2)> delayframec, function<float(vec2)> segm) {
+	vec4 c=delayframec(vec2(0,0));
+	if (c.b<0.5) {
+		c.r+=stp;
+		if (c.r>=(1.0-bsize) || segm(vec2(c.r+bsize,c.g+(bsize*prop*0.5)))>sens) c.b=1.0;
+	} else {
+		c.r-=stp;
+		if (c.r<=0.0 || segm(vec2(c.r,c.g+(bsize*prop*0.5)))>sens) c.b=0.0;
+	}
+	
+	if (c.a<0.5) {
+		c.g+=stp;
+		if (c.g>=(1.0-bsize*prop) || segm(vec2(c.r+(bsize*0.5),c.g+bsize*prop))>sens) c.a=1.0;
+	} else {
+		c.g-=stp;
+		if (c.g<=0.0 || segm(vec2(c.r+(bsize*0.5),c.g))>sens) c.a=0.0;
+	}
+	return c;
+}

@@ -1,0 +1,6 @@
+// Shader code by: @Juanmv94
+
+vec4 bprint(float bsize, float prop, std::Texture2d color, function<vec4(vec2)> position) {
+	vec2 uv = fragment(std::getVertexTexCoord());
+	return color.sample((uv-position(vec2(0,0)).rg)/bsize/vec2(1,prop));
+}
