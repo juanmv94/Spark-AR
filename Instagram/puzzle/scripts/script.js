@@ -26,41 +26,41 @@ Promise.all([Materials.findFirst('material0'),Textures.findFirst('cameraTexture0
 	});
 	picker.visible = true
 })
-//const uv = Shaders.fragmentStage(Shaders.vertexAttribute({ variableName: Shaders.VertexAttribute.TEX_COORDS }))
-const uv = Shaders.vertexAttribute({ variableName: Shaders.VertexAttribute.TEX_COORDS })
+const uv = Shaders.fragmentStage(Shaders.vertexAttribute({ variableName: Shaders.VertexAttribute.TEX_COORDS }))
 
 function limit(v) {
 	return R.clamp(v,0,1)
 }
 
 function tile(resx,resy,x,y,nx,ny) {
-	const sx=(1/resx)
-	const sy=(1/resy)
-	const newuv=uv.add(R.pack2(R.sub(x,nx).mul(sx),R.sub(y,ny).mul(sy)))
+	var sx=(1/resx)
+	var sy=(1/resy)
+	var newuv=uv.add(R.pack2(R.sub(x,nx).mul(sx),R.sub(y,ny).mul(sy)))
 	var newtex=Shaders.textureSampler(cameraColor, newuv )
 	newtex=newtex.mul(R.sub(1,limit(Shaders.sdfRectangle(R.pack2(R.mul(sx,nx).sum(sx/2),R.mul(sy,ny).sum(sy/2)),R.pack2(0.98*sx/2,0.98*sy/2),{sdfVariant: Shaders.SdfVariant.EXACT}).mul(sharpness))))
 	return newtex
 }
 
 //Dinamica
+var arrpos
 
 function inicializa(nresx,nresy,ntime,nmovs,vmovs) {
-	const ntiles=nresx*nresy-1
+	var ntiles=nresx*nresy-1
 	
 	function toMatr(i) {
 		return [i%nresx,Math.floor(i/nresx)]
 	}
 	
 	//calculamos movimientos
-	const movimientos=new Array(ntiles)
+	var movimientos=new Array(ntiles)
 	for (let i=0;i<ntiles;i++) movimientos[i]=[]
-	const tablero=new Array(nresx*nresy)
+	var tablero=new Array(nresx*nresy)
 	for (let i=0;i<=ntiles;i++) tablero[i]=i
 	var lastpieza=null;
 	for (let i=0;i<nmovs;i++) {
-		const posvacia=tablero.indexOf(ntiles)
-		const posvaciam=toMatr(posvacia)
-		const posiblesmovimientos=[]
+		var posvacia=tablero.indexOf(ntiles)
+		var posvaciam=toMatr(posvacia)
+		var posiblesmovimientos=[]
 		
 		if (posvaciam[0]>0 && tablero[posvacia-1]!==lastpieza)
 			posiblesmovimientos.push({pieza: tablero[posvacia-1], origen: posvacia-1, destino: posvacia, mov: 'r'})
@@ -71,7 +71,7 @@ function inicializa(nresx,nresy,ntime,nmovs,vmovs) {
 		if (posvaciam[1]<(nresy-1) && tablero[posvacia+nresx]!==lastpieza)
 			posiblesmovimientos.push({pieza: tablero[posvacia+nresx], origen: posvacia+nresx, destino: posvacia, mov: 'u'})
 		
-		const movimiento=posiblesmovimientos[Math.floor(Math.random()*posiblesmovimientos.length)]
+		var movimiento=posiblesmovimientos[Math.floor(Math.random()*posiblesmovimientos.length)]
 		tablero[movimiento.destino]=movimiento.pieza
 		tablero[movimiento.origen]=ntiles
 		lastpieza=movimiento.pieza;
@@ -80,13 +80,13 @@ function inicializa(nresx,nresy,ntime,nmovs,vmovs) {
 	
 	/////////////////
 	
-	const timeDriver = Animation.timeDriver({durationMilliseconds: ntime, loopCount: Infinity, mirror: true})
-    const linearSampler = Animation.samplers.easeInOutQuad(0,nmovs+vmovs*2)
-	const timeline = Animation.animate(timeDriver,linearSampler)
+	var timeDriver = Animation.timeDriver({durationMilliseconds: ntime, loopCount: Infinity, mirror: true})
+    var linearSampler = Animation.samplers.easeInOutQuad(0,nmovs+vmovs*2)
+	var timeline = Animation.animate(timeDriver,linearSampler)
 
 	var finalColor=null;
 	for (let i=0;i<ntiles;i++) {
-		const defpos=toMatr(i)
+		defpos=toMatr(i)
 		var nx=R.val(defpos[0])
 		var ny=R.val(defpos[1])
 		movimientos[i].forEach(function (v){
@@ -105,7 +105,7 @@ function inicializa(nresx,nresy,ntime,nmovs,vmovs) {
 				break
 			}
 		})
-		const newtex=tile(nresx,nresy,defpos[0],defpos[1],nx,ny)
+		var newtex=tile(nresx,nresy,defpos[0],defpos[1],nx,ny)
 		finalColor=(finalColor==null) ? newtex : Shaders.blend(finalColor,newtex,{mode: Shaders.BlendMode.NORMAL})
 	}
 	finalColor=Shaders.blend(finalColor,R.pack4(0,0,0,1),{mode: Shaders.BlendMode.NORMAL})

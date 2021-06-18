@@ -13,5 +13,8 @@ Promise.all([...Array(nopciones).keys()].map(i=>Textures.findFirst("c"+(i+1)))).
 	};
 	picker.configure(configuration);
 	picker.visible = true;
-	Patches.inputs.setScalar("opcion",picker.selectedIndex);
+});
+
+picker.selectedIndex.monitor().subscribe(function(index) {
+  Patches.setScalarValue("opcion",index.newValue);
 });

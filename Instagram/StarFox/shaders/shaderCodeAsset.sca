@@ -1,0 +1,52 @@
+#define rf 180.0
+
+// @param[default=#000000FF] c1
+// @param[default=#FFFFFFFF] c2
+// @param[default=#D8D8D8FF] c3
+// @param[default=#999999FF] c4
+// @param[default=#999999FF] d1f
+// @param[default=#AAAAAAFF] d1s
+// @param[default=#999999FF] d2f
+// @param[default=#FFFFFFFF] d2s
+// @param[default=#0000AAFF] d3f
+// @param[default=#0000FFFF] d3s
+// @return out
+function<vec4(vec2)> main(function<vec4(vec2)> inp, vec4 c1, vec4 c2, vec4 c3, vec4 c4, vec4 d1f, vec4 d1s, vec4 d2f, vec4 d2s, vec4 d3f, vec4 d3s) {
+	vec2 resolution = std::getRenderTargetSize();
+	float resadj=resolution.y/resolution.x;
+	vec2 rd = vec2(rf/resadj,rf);
+	return [](vec2 uv) {
+		vec2 coord=floor(fragment(uv*rd));
+		vec4 c=inp(coord/rd);
+		if (c.a<0.5) return vec4(0,0,0,0);
+		if (c.r>=0.5) {
+			if (c.g>=0.5) {
+				if (c.b>=0.5) {
+					return c1;
+				} else {
+					return c3;
+				}
+			} else {
+				if (c.b>=0.5) {
+					return c4;
+				} else {
+					return (mod(coord.x+coord.y,2.0)>=0.5) ? d1f : d1s;
+				}
+			}
+		} else {
+			if (c.g>=0.5) {
+				if (c.b>=0.5) {
+					return c2;
+				} else {
+					return (mod(coord.x+coord.y,2.0)>=0.5) ? d2f : d2s;
+				}
+			} else {
+				if (c.b>=0.5) {
+					return (mod(coord.x+coord.y,2.0)>=0.5) ? d3f : d3s;;
+				} else {
+					return c3;
+				}
+			}
+		}
+	};
+}

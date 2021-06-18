@@ -12,7 +12,8 @@ export const Audio = require('Audio');
 const np=148;
 const nd=34;
 
-export var sonidos;
+const sonidos=["boton","block","terminado"].reduce(function(a,b){a[b]=Audio.getPlaybackController(b);return a},{});
+
 var mahong=0;
 const mahongs=[
 //estrella
@@ -45,15 +46,14 @@ for (let i=0;i<np;i++) {
 export var materiales,piezas,texturas;
 const materialesP=Promise.all([...Array(np).keys()].map(function(n){return Materials.findFirst("material"+n);}));
 const texturasP=Promise.all([...Array(nd).keys()].map(function(n){return Textures.findFirst(""+n);}));
-const sonidosP=["boton","block","terminado"].reduce(async function(a,b){var af=await a; af[b]=await Audio.getAudioPlaybackController(b);return af},{});
 Scene.root.findFirst("placer").then(function(placer) {
 		///////////Logica inicio
 		placer.findFirst("bloques",{recursive:false}).then(function(bloques) {
 		var piezasP=Promise.all([...Array(np).keys()].map(function(n){return bloques.findFirst("b"+n,{recursive:false});}));
-		Promise.all([materialesP,piezasP,texturasP,sonidosP]).then(function(arr) {
+		Promise.all([materialesP,piezasP,texturasP]).then(function(arr) {
 			const bkgPiezaC=R.clamp(Shaders.sdfRectangle(R.pack2(0.5,0.5),R.pack2(0.55,0.55),{sdfVariant: Shaders.SdfVariant.EXACT}).mul(-8),0.5,1);
 			const bkgPieza=R.pack4(bkgPiezaC,bkgPiezaC,bkgPiezaC.mul(0.75),1);
-			materiales=arr[0], piezas=arr[1], texturas=arr[2].map(x=>Shaders.blend(x.signal,bkgPieza,{mode: Shaders.BlendMode.NORMAL})), sonidos=arr[3];
+			materiales=arr[0], piezas=arr[1], texturas=arr[2].map(x=>Shaders.blend(x.signal,bkgPieza,{mode: Shaders.BlendMode.NORMAL}));
 			for (let i=0;i<np;i++) {
 				TouchGestures.onTap(piezas[i]).subscribe(function(){piTouch(i);});
 				var newtex=Shaders.blend(bordersPieza[i],texturas[(i>>1)%nd],{mode: Shaders.BlendMode.NORMAL});
