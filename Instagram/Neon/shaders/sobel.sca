@@ -1,0 +1,26 @@
+using namespace std;
+
+vec4 xsobel(Texture2d c, vec2 d, vec2 uv) {
+	vec4 c1=-1.0*c.sample(uv+vec2(-d.x,-d.y));
+	vec4 c2=-2.0*c.sample(uv+vec2(-d.x,0));
+	vec4 c3=-1.0*c.sample(uv+vec2(-d.x,d.y));
+	vec4 c4=1.0*c.sample(uv+vec2(d.x,-d.y));
+	vec4 c5=2.0*c.sample(uv+vec2(d.x,0));
+	vec4 c6=1.0*c.sample(uv+vec2(d.x,d.y));
+	return abs((c1+c2+c3)+(c4+c5+c6));
+}
+
+vec4 ysobel(Texture2d c, vec2 d, vec2 uv) {
+	vec4 c1=-1.0*c.sample(uv+vec2(-d.x,-d.y));
+	vec4 c2=-2.0*c.sample(uv+vec2(0,-d.y));
+	vec4 c3=-1.0*c.sample(uv+vec2(d.x,-d.y));
+	vec4 c4=1.0*c.sample(uv+vec2(-d.x,d.y));
+	vec4 c5=2.0*c.sample(uv+vec2(0,d.y));
+	vec4 c6=1.0*c.sample(uv+vec2(d.x,d.y));
+	return abs((c1+c2+c3)+(c4+c5+c6));
+}
+
+vec4 main(Texture2d c, vec2 p, float d) {
+	vec2 uv = getVertexTexCoord();
+	return max(xsobel(c,d*p,uv),ysobel(c,d*p,uv));
+}

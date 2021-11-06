@@ -1,0 +1,60 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="content-language" content="es-ES" />
+    <title>Cannon.js mesh exporter by Juanmv94</title>
+	<style>
+		body { margin: 0; }
+		canvas { width: 100%; height: 100% }
+	</style>
+  </head>
+  <body>
+    <script src="./three.min.js"></script>
+	<script src="./ColladaLoader2.js"></script>
+	<script src="./FlyControls.js"></script>
+	<script>
+	var loader = new THREE.ColladaLoader();
+	var scene = new THREE.Scene();
+	scene.background = new THREE.Color(0x333333);
+	var camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 0.1, 10000 );
+	camera.position.x=0; camera.position.y=-64; camera.position.z=-128;
+	camera.rotation.x=Math.PI; camera.rotation.y=0; camera.rotation.z=0;
+	var renderer = new THREE.WebGLRenderer({antialias: false});
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	document.body.appendChild( renderer.domElement );
+	
+	function onWindowResize() {
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+		renderer.setSize( window.innerWidth, window.innerHeight );
+	}
+	window.addEventListener( 'resize', onWindowResize, false );
+	
+	var controls = new THREE.FlyControls( camera, renderer.domElement );
+	var t=performance.now();
+	var animate = function () {
+		requestAnimationFrame( animate );
+		var newt=performance.now();
+		controls.update(newt-t);
+		t=newt;
+		renderer.render( scene, camera );
+	};
+	animate();
+	
+	loader.load( "test.dae", function (collada) {
+		collada.scene.children[0].children.filter(x=>x.type!="Mesh").forEach(x=>collada.scene.children[0].remove(x));
+		model = collada.scene.children[0].children;
+		mgeo=model.map(x=>new THREE.Geometry().fromBufferGeometry(x.geometry)).reduce((x,y)=>{y.merge(x); return y;});
+		mgeo.mergeVertices();
+		console.log(JSON.stringify(mgeo.vertices.flatMap(x=>[d6(x.x),d6(x.z),d6(-x.y)]))+','+JSON.stringify(mgeo.faces.flatMap(x=>[x.a,x.b,x.c])));
+		scene.add(collada.scene.children[0]);
+	});
+	
+	function d6(n) {
+		return Math.round(n*1000000)/1000000;
+	}
+    </script>
+  </body>
+</html>
+ 
+ 
