@@ -1,0 +1,77 @@
+precision highp float;
+
+float hashpixpos(vec2 st) {
+	vec2 pixpos=floor(st*25.);
+	return fract(sin(dot(pixpos, vec2(12.9898, 4.1414))) * 43758.5453);
+}
+
+vec4 d1(vec4 b, vec4 w, vec2 uv) {return length(uv-0.5)<0.45 ? b : w;}
+vec4 d2(vec4 b, vec4 w, vec2 uv) {return length(max(abs(uv-0.5)-0.425,0.0))>0.0 ? w : b;}
+vec4 d3(vec4 b, vec4 w, vec2 uv) {return length(max(abs(uv-0.5)-0.15,0.0))>0.3 ? w : b;}
+vec4 d4(vec4 b, vec4 w, vec2 uv) {return (length(uv-0.5)<0.45 && length(uv-0.5)>0.15) ? b : w;}
+vec4 d5(vec4 b, vec4 w, vec2 uv) {
+	float l=length(max(abs(uv-0.5)-0.2,0.0));
+	return fract(sqrt(l)*2.5)<0.3 ? b : w;
+}
+vec4 d6(vec4 b, vec4 w, vec2 st) {return hashpixpos(st)<0.5 ? d1(b,w,fract(st*25.)) : d2(b,w,fract(st*25.));}
+vec4 d7(vec4 b, vec4 w, vec2 st) {
+	vec2 uv=fract(st*25.);
+	vec2 pixpos=floor(st*25.);
+	float s=sin(length(pixpos)*0.35-std::getTime()*3.)*0.05+0.425;
+	return length(max(abs(uv-0.5)-s,0.0))>0.0 ? w : b;
+}
+vec4 d8(vec4 b, vec4 w, vec2 st) {
+	vec2 uv=fract(st*25.);
+	vec2 pixpos=floor(st*25.);
+	float s=sin(hashpixpos(st)*6.2831853-std::getTime()*3.)*0.05+0.425;
+	return length(max(abs(uv-0.5)-s,0.0))>0.0 ? w : b;
+}
+vec4 d9(vec4 b, vec4 w, vec2 st) {return mix(w,b,fract(st.y*40.-std::getTime()));}
+
+vec4 d(int i, vec4 b, vec4 w, vec2 st) {
+	switch (i) {
+		case 1: return d1(b, w, fract(st*25.));
+		case 2: return d2(b, w, fract(st*25.));
+		case 3: return d3(b, w, fract(st*25.));
+		case 4: return d4(b, w, fract(st*25.));
+		case 5: return d5(b, w, fract(st*25.));
+		case 6: return d6(b, w, st);
+		case 7: return d7(b, w, st);
+		case 8: return d8(b, w, st);
+		case 9: return d9(b, w, st);
+		default: return b;
+	}
+}
+
+/****** Fake QR ******/
+
+vec4 sq(vec2 st, vec4 b, vec4 w, vec2 pos) {
+	float d1=length(max(abs(st-pos)-2.5,0.0));
+	float d2=length(max(abs(st-pos)-1.0,0.0));
+	return d2< 0.5 ? b : (d1< 1.0 && d1>0.) ? b : w;
+}
+
+vec4 fakeqr(vec2 st, vec4 b, vec4 w) {
+	if (st.x<7.25 && st.y<7.25) return sq(st,b,w,vec2(3.5));
+	if (st.x<7.25 && st.y>17.75) return sq(st,b,w,vec2(3.5,21.5));
+	if (st.x>17.75 && st.y<7.25) return sq(st,b,w,vec2(21.5,3.5));
+	return hashpixpos(floor(st))<0.5 ? (fract((st.x+st.y)*0.5)>0.5 ? w : b) : (fract((st.x-st.y)*0.5)>0.5 ? w : b);
+}
+
+
+/*********************/
+
+function<vec4(vec2)> main(vec4 b, vec4 w, /*float padding,*/ int design, float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, float r9, float r10, float r11, float r12, float r13, float r14, float r15, float r16, float r17, float r18, float r19, float r20, float r21, float r22, float r23, float r24) {
+	float rows[25]={r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19,r20,r21,r22,r23,r24};
+	float divs[24]={1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608};
+    // Creating and returning a lambda function
+    return [](vec2 uv) {
+		vec2 st=fragment(uv);/*fragment((uv-0.5)*(1.0+padding)+0.5);*/
+		/*if (st.x<0.0 || st.x>=1.0 || st.y<0.0 || st.y>=1.0) return w;*/
+		if (design<0) return fakeqr(st*25.,b,w);
+		int row=int(st.y*25.0), col=int(st.x*25.0);
+		if (col==24) return (rows[row]<0.0) ? d(design,b,w,st) : w;
+		float rowval=abs(rows[row]), cold=divs[col];
+		return (fract(rowval/cold/2.0)>=0.5) ? d(design,b,w,st) : w;
+	};
+}

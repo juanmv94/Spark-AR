@@ -12,9 +12,18 @@ export const Audio = require('Audio');
 const np=148;
 const nd=34;
 
-const sonidos=["boton","block","terminado"].reduce(function(a,b){a[b]=Audio.getPlaybackController(b);return a},{});
+var sonidos;
 
 var mahong=0;
+
+function PromiseKeys(keys,f) {
+	return new Promise(resolve=>{
+		Promise.all(keys.map(x=>f(x))).then(values=>{
+			resolve(Object.fromEntries(keys.map((k,i)=>[k,values[i]])));
+		});
+	});
+}
+
 const mahongs=[
 //estrella
 [[{"y":8,"x":16},{"y":6,"x":14},{"y":8,"x":14},{"y":10,"x":14},{"y":4,"x":12},{"y":6,"x":12},{"y":8,"x":12},{"y":10,"x":12},{"y":12,"x":12},{"y":2,"x":10},{"y":4,"x":10},{"y":6,"x":10},{"y":8,"x":10},{"y":10,"x":10},{"y":12,"x":10},{"y":14,"x":10},{"y":0,"x":8},{"y":2,"x":8},{"y":4,"x":8},{"y":6,"x":8},{"y":8,"x":8},{"y":10,"x":8},{"y":12,"x":8},{"y":14,"x":8},{"y":16,"x":8},{"y":2,"x":6},{"y":4,"x":6},{"y":6,"x":6},{"y":8,"x":6},{"y":10,"x":6},{"y":12,"x":6},{"y":14,"x":6},{"y":4,"x":4},{"y":6,"x":4},{"y":8,"x":4},{"y":10,"x":4},{"y":12,"x":4},{"y":6,"x":2},{"y":8,"x":2},{"y":10,"x":2},{"y":8,"x":0}],[{"y":8,"x":14},{"y":6,"x":12},{"y":8,"x":12},{"y":10,"x":12},{"y":4,"x":10},{"y":6,"x":10},{"y":8,"x":10},{"y":10,"x":10},{"y":12,"x":10},{"y":2,"x":8},{"y":4,"x":8},{"y":6,"x":8},{"y":8,"x":8},{"y":10,"x":8},{"y":12,"x":8},{"y":14,"x":8},{"y":4,"x":6},{"y":6,"x":6},{"y":8,"x":6},{"y":10,"x":6},{"y":12,"x":6},{"y":6,"x":4},{"y":8,"x":4},{"y":10,"x":4},{"y":8,"x":2}],[{"y":8,"x":12},{"y":6,"x":10},{"y":8,"x":10},{"y":10,"x":10},{"y":4,"x":8},{"y":6,"x":8},{"y":8,"x":8},{"y":10,"x":8},{"y":12,"x":8},{"y":6,"x":6},{"y":8,"x":6},{"y":10,"x":6},{"y":8,"x":4}],[{"y":8,"x":10},{"y":6,"x":8},{"y":8,"x":8},{"y":10,"x":8},{"y":8,"x":6}],[{"y":8,"x":9},{"y":8,"x":7}]],
@@ -46,14 +55,15 @@ for (let i=0;i<np;i++) {
 export var materiales,piezas,texturas;
 const materialesP=Promise.all([...Array(np).keys()].map(function(n){return Materials.findFirst("material"+n);}));
 const texturasP=Promise.all([...Array(nd).keys()].map(function(n){return Textures.findFirst(""+n);}));
+const sonidosP=PromiseKeys(["boton","block","terminado"],Audio.getAudioPlaybackController);
 Scene.root.findFirst("placer").then(function(placer) {
 		///////////Logica inicio
 		placer.findFirst("bloques",{recursive:false}).then(function(bloques) {
 		var piezasP=Promise.all([...Array(np).keys()].map(function(n){return bloques.findFirst("b"+n,{recursive:false});}));
-		Promise.all([materialesP,piezasP,texturasP]).then(function(arr) {
+		Promise.all([materialesP,piezasP,texturasP,sonidosP]).then(function(arr) {
 			const bkgPiezaC=R.clamp(Shaders.sdfRectangle(R.pack2(0.5,0.5),R.pack2(0.55,0.55),{sdfVariant: Shaders.SdfVariant.EXACT}).mul(-8),0.5,1);
 			const bkgPieza=R.pack4(bkgPiezaC,bkgPiezaC,bkgPiezaC.mul(0.75),1);
-			materiales=arr[0], piezas=arr[1], texturas=arr[2].map(x=>Shaders.blend(x.signal,bkgPieza,{mode: Shaders.BlendMode.NORMAL}));
+			materiales=arr[0], piezas=arr[1], texturas=arr[2].map(x=>Shaders.blend(x.signal,bkgPieza,{mode: Shaders.BlendMode.NORMAL})), sonidos=arr[3];
 			for (let i=0;i<np;i++) {
 				TouchGestures.onTap(piezas[i]).subscribe(function(){piTouch(i);});
 				var newtex=Shaders.blend(bordersPieza[i],texturas[(i>>1)%nd],{mode: Shaders.BlendMode.NORMAL});

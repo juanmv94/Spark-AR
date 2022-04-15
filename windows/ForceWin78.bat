@@ -1,1 +1,0 @@
-START "" msiexec /i %1% WIN10ORLATERDETECTED=1

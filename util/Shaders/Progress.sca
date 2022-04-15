@@ -1,0 +1,19 @@
+#define PI 3.1415926535897932384626433832795
+
+float ang(float x, float y) {
+  if (x<=0. && y<0.) return atan(x/y);
+  if (x<0. && y>=0.) return atan(-y/x)+PI*0.5;
+  if (x>=0. && y>0.) return atan(x/y)+PI;
+  if (x>0. && y<=0.) return atan(-y/x)+PI*1.5;
+  return 0.;	//x==0 && y==0 (center)
+}
+
+// @param[default=#00FFFFFF] color1
+// @return color
+vec4 main(vec4 color1, float progress) {
+  vec2 uv = fragment(std::getVertexTexCoord());
+  vec2 uvc = uv-0.5;
+  if (length(uvc)>=0.5) return vec4(0.);
+  if (ang(uvc.x,uvc.y)>=progress*2.0*PI) return vec4(0.);
+  return color1; //vec4(uv,1.,1.);
+}

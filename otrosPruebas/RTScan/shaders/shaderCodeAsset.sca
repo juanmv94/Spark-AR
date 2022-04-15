@@ -1,0 +1,9 @@
+#define S 7
+#define SF 6.
+
+vec4 main(std::Texture2d t0, std::Texture2d t1, std::Texture2d t2, std::Texture2d t3, std::Texture2d t4, std::Texture2d t5, std::Texture2d t6) {
+  vec2 uv = std::getVertexTexCoord();
+  vec4 arr[S]={t0.sample(uv),t1.sample(uv),t2.sample(uv),t3.sample(uv),t4.sample(uv),t5.sample(uv),t6.sample(uv)};
+  int arrv=int(uv.y*SF);
+  return mix(arr[arrv], arr[arrv+1], fract(fragment(uv.y)*SF));
+}
