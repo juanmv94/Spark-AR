@@ -1,0 +1,131 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+table {
+  border-collapse: collapse;
+  width: 200px;
+}
+
+td, th {
+  border: 1px solid #000000;
+  height: 16px;
+}
+
+tr:nth-child(even) {
+  /*background-color: #dddddd;*/
+}
+</style>
+</head>
+<body style="text-align:center; background:linear-gradient(30deg, #ffccee,#ffeecc, #ffeeff, #ffddbb);">
+<div><input type="file" id="file_input"> <input type="button" value="Exportar" id="exportj"> <input type="button" value="Importar" id="importj"></div>
+<div><audio id="player" controls></audio> <input type="button" value="0.25" onclick="player.playbackRate=0.25;"> <input type="button" value="0.5" onclick="player.playbackRate=0.5;"> <input type="button" value="1" onclick="player.playbackRate=1;"></div>
+<div><textarea id="textarea" cols="40" rows="2"></textarea></div>
+<br/>
+<div id="griddiv" style="display:inline-flex; height:510px; overflow-y: scroll;">
+<table id="grid">
+</table>
+<h1 id="pos" style="margin: 0;position: relative; height: fit-content; left:-200px; pointer-events: none; user-select: none; top:-14px;">-------------------&lt;</h1>
+</div>
+<script>
+const sps=5, cols=11;
+var scroll=0;
+
+file_input.addEventListener('change', function (e) {
+    var URL = window.webkitURL || window.URL;
+	player.src=URL.createObjectURL(e.target.files[0]);
+});
+
+player.onloadedmetadata=function() {
+	console.log(player.duration);
+	grid.innerHTML="";
+	const rows=Math.floor(player.duration*sps);
+	for (var i=0; i<rows; i++) {
+		var tr = document.createElement('tr');   
+		for (var j=0; j<cols; j++) {
+			var td = document.createElement('td');
+			td.onmousedown=e=>{
+				e.target.style.backgroundColor=e.target.style.backgroundColor?"":"red";
+				e.stopPropagation();
+			}
+			tr.appendChild(td);
+		}
+		grid.appendChild(tr);
+	}
+}
+
+setInterval(function() {
+	let oldtop=pos.style.top;
+	let newtop=Math.floor(player.currentTime*16*sps-14)+"px";
+	if (oldtop!=newtop) {
+		pos.style.top=newtop;
+		griddiv.scroll(0,scroll=Math.max(0,player.currentTime*16*sps-14-280));
+	}
+},50);
+
+griddiv.onmousedown=e=>{
+	if (player.src) player.currentTime=(e.offsetY+scroll)/16/sps;
+}
+
+importj.onclick=e=>{
+  let arr=JSON.parse(textarea.value);
+  for (let e of arr) {
+	grid.getElementsByTagName("tr")[e[0]*sps/1000].getElementsByTagName("td")[e[1]*(cols-1)].style.backgroundColor="red";
+  }
+}
+
+exportj.onclick=e=>{
+	let arr=[];
+	[...grid.getElementsByTagName("tr")].forEach((x,i)=>{
+		[...x.getElementsByTagName("td")].forEach((y,j)=>{
+			if (y.style.backgroundColor) arr.push([i*1000/sps,j/(cols-1)]);
+		});
+	});
+	textarea.value=JSON.stringify(arr);
+}
+
+/*
+function loadImage(url) {
+	return new  Promise(resolve => {
+		const image = new Image();
+		image.addEventListener('load', () => {
+			resolve(image);
+		});
+		image.src = url; 
+	});
+}
+
+function cargarImagen(arrimgs) {
+	var canvas = document.createElement('canvas');
+	var ctx=canvas.getContext('2d');
+	w=arrimgs[0].width; h=arrimgs[0].height; l=arrimgs.length;
+	sumarr=new Uint32Array(w*h*4);
+	canvas.width = w;
+	canvas.height = h;
+	arrimgs.forEach(img=>{
+		ctx.clearRect(0,0,w,h);
+		ctx.drawImage(img,0,0,w,h);
+		var imgdatad=ctx.getImageData(0,0,w,h).data;
+		for (let i=0;i<imgdatad.length;i++) sumarr[i]+=imgdatad[i];
+	});
+	ib.disabled=false; ic.disabled=false;
+	ic.value=l; ib.value=0;
+	generarImagen();
+}
+
+function generarImagen() {
+	var canvasf= document.createElement('canvas');		//Creamos canvas definitivo
+	var ctxf=canvasf.getContext('2d');
+	canvasf.width = w;
+	canvasf.height = h;
+	var imgdata=ctxf.createImageData(w,h);
+	var imgdatad=imgdata.data;
+	var cn=parseInt(ic.value), br=parseInt(ib.value);
+	for (let i=0;i<imgdatad.length;i++) imgdatad[i]=((i%4)==3)?(sumarr[i]/l):(sumarr[i]/cn+br);
+	ctxf.putImageData(imgdata,0,0);
+	resultado.src=canvasf.toDataURL("image/png");
+}
+*/
+</script>
+</body>
+</html>

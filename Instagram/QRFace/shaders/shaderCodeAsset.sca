@@ -29,18 +29,24 @@ vec4 d8(vec4 b, vec4 w, vec2 st) {
 vec4 d9(vec4 b, vec4 w, vec2 st) {return mix(w,b,fract(st.y*40.-std::getTime()));}
 
 vec4 d(int i, vec4 b, vec4 w, vec2 st) {
-	switch (i) {
-		case 1: return d1(b, w, fract(st*25.));
-		case 2: return d2(b, w, fract(st*25.));
-		case 3: return d3(b, w, fract(st*25.));
-		case 4: return d4(b, w, fract(st*25.));
-		case 5: return d5(b, w, fract(st*25.));
-		case 6: return d6(b, w, st);
-		case 7: return d7(b, w, st);
-		case 8: return d8(b, w, st);
-		case 9: return d9(b, w, st);
-		default: return b;
+	if (i<0) return b;									//case -1
+	if (i<4) {
+		if (i<2) {
+			if (i<1) return d1(b, w, fract(st*25.));	//case 0
+			return d2(b, w, fract(st*25.));				//case 1
+		}
+		if (i<3) return d3(b, w, fract(st*25.));		//case 2
+		return d4(b, w, fract(st*25.));					//case 3
 	}
+	if (i<8) {
+		if (i<6) {
+			if (i<5) return d5(b, w, fract(st*25.));	//case 4
+			return d6(b, w, st);						//case 5
+		}
+		if (i<7) return d7(b, w, st);					//case 6
+		return d8(b, w, st);							//case 7
+	}
+	return d9(b, w, st);								//case 8
 }
 
 /****** Fake QR ******/
@@ -68,7 +74,7 @@ function<vec4(vec2)> main(vec4 b, vec4 w, /*float padding,*/ int design, float r
     return [](vec2 uv) {
 		vec2 st=fragment(uv);/*fragment((uv-0.5)*(1.0+padding)+0.5);*/
 		/*if (st.x<0.0 || st.x>=1.0 || st.y<0.0 || st.y>=1.0) return w;*/
-		if (design<0) return fakeqr(st*25.,b,w);
+		if (design>8) return fakeqr(st*25.,b,w);
 		int row=int(st.y*25.0), col=int(st.x*25.0);
 		if (col==24) return (rows[row]<0.0) ? d(design,b,w,st) : w;
 		float rowval=abs(rows[row]), cold=divs[col];

@@ -1,0 +1,19 @@
+float dilate(std::Texture2d tex, float kernelWidth, vec2 uv) {
+  vec2 d = kernelWidth / (tex.size * 0.5);
+  float c = 0.0;
+  for (int x = -1; x <= 1; ++x) {
+    for (int y = -1; y <= 1; ++y) {
+      vec2 st = uv  + d * vec2(float(x), float(y));
+      float v = tex.sample(st).r;
+      c = max(c, v);
+    }
+  }
+  return c;
+}
+
+function<vec4(vec2)> main(std::Texture2d InputImage, float DilationKernelWidth ) {
+  return [](vec2 uv) {
+    float a = dilate(InputImage, DilationKernelWidth, fragment(uv));
+    return vec4(a);
+  };
+}

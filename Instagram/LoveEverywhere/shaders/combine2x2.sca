@@ -1,0 +1,13 @@
+// Shader code by: @Juanmv94
+
+function<vec4(vec2)> combine2x2(function<vec4(vec2)> b00,function<vec4(vec2)> b10,function<vec4(vec2)> b01,function<vec4(vec2)> b11) {
+  return [](vec2 uv) {
+	vec2 nuv=uv*vec2(2.0,2.0);
+	if (nuv.y<1.0) {
+		if (nuv.x<1.0) return b00(nuv);
+		return b10(nuv-vec2(1,0));
+	}
+	if (nuv.x<1.0) return b01(nuv-vec2(0,1));
+	return b11(nuv-vec2(1,1));
+  };
+}

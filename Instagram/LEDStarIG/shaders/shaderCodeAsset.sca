@@ -8,18 +8,12 @@
 #define CHARSETSIZE vec2(16.,8.)
 
 vec4 main(std::Texture2d charset, float offset, float charn0, float charn1, float charn2, float charn3, float charn4, float charn5) {
+  float charn[6]={charn0,charn1,charn2,charn3,charn4,charn5};
   vec2 uv = fragment(std::getVertexTexCoord());
   float uvxtemp=uv.x*5.+offset;
   int charp=int(uvxtemp);
   vec2 charpos=vec2(0.,0.);
-  switch (charp) {
-	case 0: charpos=vec2(mod(charn0,16.),floor(charn0/16.)); break;
-	case 1: charpos=vec2(mod(charn1,16.),floor(charn1/16.)); break;
-	case 2: charpos=vec2(mod(charn2,16.),floor(charn2/16.)); break;
-	case 3: charpos=vec2(mod(charn3,16.),floor(charn3/16.)); break;
-	case 4: charpos=vec2(mod(charn4,16.),floor(charn4/16.)); break;
-	case 5: charpos=vec2(mod(charn5,16.),floor(charn5/16.)); break;
-  }
+  charpos=vec2(mod(charn[charp],16.),floor(charn[charp]/16.));
   vec2 uvc = (vec2(fract(uvxtemp),uv.y)+charpos)/CHARSETSIZE;
   return charset.sample(uvc);
   

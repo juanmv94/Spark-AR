@@ -132,8 +132,8 @@ function plataforma() {
 		b.hidden=false;
 	}
 	
-	while (np < 120) plataformas[np++].hidden=true;
-	while (nb < 120) piezas[nb++].hidden=true;
+	while (np < plataformas.length) plataformas[np++].hidden=true;
+	while (nb < piezas.length) piezas[nb++].hidden=true;
 }
 
 //Inicializacion todo

@@ -4,7 +4,7 @@ const qr = require('./qr');
 
 Materials.findFirst("material0").then(mat=>{
 	function updateQR() {
-		const d = new Date();
+		const d = new Date(Date.now());
 		const day=d.getDate().toString().padStart(2,'0');
 		const month=(d.getMonth()+1).toString().padStart(2,'0');
 		const year=d.getFullYear().toString();

@@ -1,0 +1,12 @@
+vec4  applySmoothing(std::Texture2d tex, float edgeSoftness, vec2 uv) {
+  float initialThresholdLow = 0.5 - edgeSoftness / 2.0;
+  float initialThresholdHigh =  0.5 + edgeSoftness / 2.0;
+  float a = smoothstep(initialThresholdLow, initialThresholdHigh, tex.sample(uv).a);
+  return vec4(a);
+}
+
+function<vec4(vec2)> main(std::Texture2d InputImage, float EdgeSoftness ) {
+  return [](vec2 uv) {
+    return applySmoothing(InputImage, EdgeSoftness, fragment(uv));
+  };
+}

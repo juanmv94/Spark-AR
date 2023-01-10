@@ -1,0 +1,19 @@
+float erode(std::Texture2d tex, vec2 uv) {
+  vec2 d =  1.74 / (tex.size * 0.5);
+  float c = 1.0;
+  for (int x = -1; x <= 1; ++x) {
+    for (int y = -1; y <= 1; ++y) {
+      vec2 st = uv + d * vec2(float(x), float(y));
+      float v = tex.sample(st).r;
+      c = min(c, v);
+    }
+  }
+  return c;
+}
+
+function<vec4(vec2)> main(std::Texture2d InputImage) {
+  return [](vec2 uv) {
+    float a = erode(InputImage, fragment(uv));
+    return vec4(a);
+  };
+}

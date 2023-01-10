@@ -1,0 +1,29 @@
+function<float(vec2)> gameoflife(function<float(vec2)> s, vec2 screenoff) {
+     // Creating and returning a lambda function
+     return [](vec2 uv) {
+		float p0=s(uv-screenoff), p1=s(uv-vec2(0.,screenoff.y)), p2=s(uv-vec2(-screenoff.x,screenoff.y)),
+				p3=s(uv-vec2(screenoff.x,0.)), p4=s(uv+vec2(screenoff.x,0.)),
+				p5=s(uv+screenoff), p6=s(uv+vec2(0.,screenoff.y)), p7=s(uv+vec2(-screenoff.x,screenoff.y));
+		bool leftpadding=uv.x>=screenoff.x;
+		bool rightpadding=uv.x<(1.-screenoff.x);
+		bool toppadding=uv.y>=screenoff.y;
+		bool bottompadding=uv.y<(1.-screenoff.y);
+		
+		int alives = 0;
+		if (leftpadding && toppadding && p0<=0.5) alives++;
+		if (toppadding && p1<=0.5) alives++;
+		if (rightpadding && toppadding && p2<=0.5) alives++;
+		if (leftpadding && p3<=0.5) alives++;
+		if (rightpadding && p4<=0.5) alives++;
+		if (rightpadding && bottompadding && p5<=0.5) alives++;
+		if (bottompadding && p6<=0.5) alives++;
+		if (leftpadding && bottompadding && p7<=0.5) alives++;
+
+		float curr=s(uv);
+		if (curr<=0.5) {	//alive
+			return (alives<2 || alives >3) ? max(max(max(p0,p1),max(p2,p3)),max(max(p4,p5),max(p6,p7))) : curr;
+		} else {			//death
+			return (alives==3) ? min(min(min(p0,p1),min(p2,p3)),min(min(p4,p5),min(p6,p7))) : curr;
+		}
+	 };
+}
