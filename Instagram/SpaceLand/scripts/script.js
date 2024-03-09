@@ -4,7 +4,9 @@ const Patches = require('Patches');
 const Scene = require('Scene');
 const Time = require('Time');
 const Audio = require('Audio');
-export const CameraInfo = require('CameraInfo')
+export const CameraInfo = require('CameraInfo');
+
+var sKonami,sEndok,sCrash;	//sonido
 
 const face = FaceTracking.face(0);
 Promise.all([Scene.root.findFirst('fuego1'),Scene.root.findFirst('fuego2'),Scene.root.findFirst('fuego3')]).then(function(fuegos) {
@@ -16,9 +18,6 @@ fuegos.forEach(function(f) {
 });
 
 Scene.root.findFirst('motor').then(function(m){m.volume=face.mouth.openness.mul(5);});
-const sKonami = Audio.getPlaybackController('konami');
-const sEndok = Audio.getPlaybackController('endok');
-const sCrash = Audio.getPlaybackController('crash');
 
 //KONAMI
 
@@ -192,8 +191,9 @@ function intersects(a,b,c,d,p,q,r,s) {
   }
 };
 
-Promise.all([Patches.outputs.getScalar("rotacionCara"),Scene.root.findFirst("nave"),Scene.root.findFirst("canvas0")]).then(function(arr) {
+Promise.all([Patches.outputs.getScalar("rotacionCara"),Scene.root.findFirst("nave"),Scene.root.findFirst("canvas0"),Promise.all(['konami','endok','crash'].map(x=>Audio.getAudioPlaybackController(x)))]).then(function(arr) {
 	rDegs=arr[0]; nave=arr[1]; xs=arr[2].width; ys=arr[2].height;
+	[sKonami,sEndok,sCrash]=arr[3];
 	startLevel();
 	const intervalo=Time.setInterval(fint,40);
 });

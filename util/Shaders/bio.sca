@@ -1,0 +1,19 @@
+//https://www.shadertoy.com/view/DsVSDR
+//precision highp float;
+using namespace std;
+
+vec4 mainImage() {
+    vec2 n=vec2(0.), q=vec2(0.), p = fragment(getVertexTexCoord())-0.5;
+    float d = dot(p, p), S = 9.0, a = 0.0, j = 0.0;
+    
+    for (int i = 0; i < 20; i++) {
+        mat2 m = mat2(cos(5.0), -sin(5.0), sin(5.0), cos(5.0));
+        p *= m; n *= m;
+        q = p*S + getTime()*4.0 + sin(getTime()*4.0 - d*6.0)*0.8 + j + n;
+        a += dot(cos(q)/S, vec2(0.2));
+        n -= sin(q);
+        S *= 1.2;
+        j += 1.0;
+    }
+    return (a + 0.2)*vec4(4.0, 2.0, 1.0, 0.0) + a + a - d;
+}

@@ -1,5 +1,7 @@
+const galleryTex2Scr = require('./galleryTex2Scr.js')
 const Textures = require('Textures');
 const Materials = require('Materials');
+const Scene = require('Scene');
 const Shaders = require('Shaders');
 const NativeUI = require('NativeUI');
 const picker = NativeUI.picker;
@@ -32,3 +34,9 @@ Materials.findFirst('material0').then(function(material) {
 		});
 	});
 });
+
+Promise.all([Textures.findFirst("galleryTexture0"), Materials.findFirst('material1'), Scene.root.findFirst('rectangle1')]).then(([gt,mat,rec])=>gt.onMediaChange.subscribe(x=>{
+	let [uv]=galleryTex2Scr(gt);
+	mat.setTextureSlot(Shaders.DefaultMaterialTextures.DIFFUSE, Shaders.textureSampler(gt.signal, uv));
+	rec.hidden=false;
+}));

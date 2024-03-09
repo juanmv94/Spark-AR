@@ -1,6 +1,9 @@
+const galleryTex2Scr = require('./galleryTex2Scr.js')
 const R = require('Reactive')
 const Textures = require('Textures');
+const Materials = require('Materials');
 const Patches = require('Patches');
+const Shaders = require('Shaders');
 const NativeUI = require('NativeUI');
 const picker = NativeUI.picker;
 
@@ -17,6 +20,8 @@ Promise.all([...Array(nluts).keys()].map(i=>Textures.findFirst(""+i))).then(func
 	Patches.inputs.setScalar("op",picker.selectedIndex);
 });
 
-Textures.findFirst("galleryTexture0").then(function(gt){
-	Patches.inputs.setBoolean("gt",gt.state.eq("AVAILABLE"));
-});
+Promise.all([Textures.findFirst("galleryTexture0"), Materials.findFirst('material0')]).then(([gt,mat])=>gt.onMediaChange.subscribe(x=>{
+	let [uv]=galleryTex2Scr(gt);
+	mat.setTextureSlot(Shaders.DefaultMaterialTextures.DIFFUSE, Shaders.textureSampler(gt.signal, uv));
+	Patches.inputs.setBoolean("gt",true);
+}));

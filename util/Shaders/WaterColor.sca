@@ -1,0 +1,16 @@
+using namespace std;
+#define DELTA 0.01
+
+vec4 main(Texture2d tex0, Texture2d texDelay, float rate) {
+	vec2 blend_uv = fragment(getVertexTexCoord());
+	vec2 uv = vec2(1.0 - blend_uv.x, blend_uv.y);
+    vec3 intensity = 1.0 - tex0.sample(uv).rgb;
+    
+    float vidSample = dot(vec3(1.0), tex0.sample(uv).rgb);
+    float vidSampleDx = dot(vec3(1.0), tex0.sample(uv + vec2(DELTA, 0.0)).rgb);
+    float vidSampleDy = dot(vec3(1.0), tex0.sample(uv + vec2(0.0, DELTA)).rgb);
+    
+    vec2 flow = DELTA * vec2 (vidSampleDy - vidSample, vidSample - vidSampleDx);
+    intensity = (1.0-rate) * intensity + rate * (1.0 - texDelay.sample(blend_uv + vec2(-1.0, 1.0) * flow).rgb);
+    return vec4(1.0 - intensity, 1.0);
+}

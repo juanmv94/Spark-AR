@@ -7,6 +7,7 @@ const Patches = require('Patches');
 const Persistence = require('Persistence');
 const R = require('Reactive');
 const Scene = require('Scene');
+const Time = require('Time');
 const Textures = require('Textures');
 
 const songs=[
@@ -65,7 +66,7 @@ Promise.all([Promise.all(songs.map((_,i)=>Textures.findFirst(""+i))),
 		Patches.inputs.setBoolean("onStarY",onStarY);
 		Patches.inputs.setScalar("durationPos",durationPos);
 		level.transform.y=Animation.animate(timeDriver,Animation.samplers.linear(0, -songs[song].duration * songs[song].speed));
-		loadSong(song,level,durationPos);
+		loadSong(song,level,timeDriver);
 		timeDriver.onCompleted().subscribe(()=>{
 			const finalscore=signalScore.pinLastValue();
 			let evtext="Superado!\nPuntuacion:\n"+finalscore*10;
@@ -87,17 +88,24 @@ Promise.all([Promise.all(songs.map((_,i)=>Textures.findFirst(""+i))),
 	}));
 });
 
-const stars=[];
-async function loadSong(s,level,durationPos) {
-	for (let i=0;i<songs[s].keys.length;i++) {
+const NSTARS = 10, stars=[];
+async function loadSong(s,level,timeDriver) {
+	for (let i=0;i<NSTARS;i++) {
 		stars[i] = await Blocks.instantiate('star',{name: "s"+i, });
-		stars[i].transform.x=(songs[s].keys[i][1]-0.5)*0.15+0.025;
-		stars[i].transform.y=songs[s].keys[i][0]*songs[s].speed;
+		const ikeys=songs[s].keys.filter((_,x)=>x%NSTARS==i);
+		const knots=[...ikeys.map((x,i)=>i?x[0]-1400:0),songs[s].duration];
+		stars[i].transform.x=Animation.animate(timeDriver,Animation.samplers.sequence({
+			samplers: ikeys.map(x=>Animation.samplers.constant((x[1]-0.5)*0.15+0.025)),
+			knots
+		}));
+		stars[i].transform.y=Animation.animate(timeDriver,Animation.samplers.sequence({
+			samplers: ikeys.map(x=>Animation.samplers.constant(x[0]*songs[s].speed)),
+			knots
+		}));
 		stars[i].inputs.setScalar("rotation",starAnim);
-		//await Patches.inputs.setScalar("durationPos",i/songs[0].keys.length);
 		stars[i].hidden=true;
 		level.addChild(stars[i]);
-		stars[i].hidden=stars[i].transform.y.sum(level.transform.y).abs().ge(0.5);
+		Time.setTimeout(()=>stars[i].hidden=false, 0);
 	}
 }
 
