@@ -1,0 +1,63 @@
+//https://www.shadertoy.com/view/MsGSRd
+precision highp float;
+using namespace std;
+
+// created by florian berger (flockaroo) - 2016
+// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+
+// single pass CFD
+// ---------------
+// this is some "computational flockarooid dynamics" ;)
+// the self-advection is done purely rotational on all scales. 
+// therefore i dont need any divergence-free velocity field. 
+// with stochastic sampling i get the proper "mean values" of rotations 
+// over time for higher order scales.
+//
+// try changing "RotNum" for different accuracies of rotation calculation
+// for even RotNum uncomment the line #define SUPPORT_EVEN_ROTNUM
+
+#define RotNum 5
+const float ang = 2.0*3.1415926535/float(RotNum);
+//mat2 m = mat2(cos(ang),sin(ang),-sin(ang),cos(ang));
+const mat2 m = mat2(0.3090169944,0.95105651628,-0.95105651628,0.3090169944);
+
+float getRot(Texture2d texDelay, vec2 iResolution, mat2 m, vec2 pos, vec2 b) {
+    vec2 p = b;
+    float rot=0.0;
+	for(int i=0;i<RotNum;i++)
+    {
+        rot+=dot(texDelay.sample(fract((pos+p)/iResolution)).xy-vec2(0.5),p.yx*vec2(3,-3));
+        p = m*p;
+    }
+    return rot/float(RotNum)/dot(b,b);
+}
+
+vec4 mainImage(Texture2d texDelay, vec2 iResolution) {
+	vec2 uv = fragment(getVertexTexCoord());
+    vec2 pos = uv*iResolution;
+    float rnd = 0.; //fract(getTime())-0.5;
+    
+    vec2 b = vec2(1.,0.); //vec2(cos(ang*rnd),sin(ang*rnd));
+    vec2 v=vec2(0);
+    //float bbMax=0.7*iResolution.y; bbMax*=bbMax;
+    for(int l=0;l<6;l++)
+    {
+        //if ( dot(b,b) > bbMax ) break;
+        vec2 p = b;
+        for(int i=0;i<RotNum;i++)
+        {
+            // this is faster but works only for odd RotNum
+            v+=p.yx*getRot(texDelay, iResolution, m, pos+p,b);
+            p = m*p;
+        }
+        b*=2.0;
+    }
+    
+    vec4 fragColor=texDelay.sample(fract((pos+v*vec2(-1,1)*2.0)/iResolution));
+    
+    // add a little "motor" in the center
+    //vec2 scr=uv*2.0-vec2(1.0);
+    //fragColor.xy += (0.01*scr / (dot(scr,scr)/0.1+0.3));
+	
+	return fragColor;
+}

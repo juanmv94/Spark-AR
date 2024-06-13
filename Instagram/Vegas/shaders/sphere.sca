@@ -1,0 +1,45 @@
+//https://www.shadertoy.com/view/wdSXRz
+
+using namespace std;
+
+vec3 rotate(vec3 lrf, vec2 guvf) {
+    vec2 c = cos(guvf);
+    vec2 s = sin(guvf);
+    mat3 yawRotation = mat3(
+        c.x,  0.0, s.x,
+        0.0,     1.0, 0.0,
+        -s.x, 0.0, c.x
+    );
+    mat3 pitchRotation = mat3(
+        1.0,    0.0,      0.0,
+        0.0, c.y, -s.y,
+        0.0, s.y,  c.y
+    );
+    return yawRotation * pitchRotation * lrf;
+}
+
+vec4 main(Texture2d tex1, /*Texture2d tex2,*/ vec2 iResolution, vec3 lightvec, vec2 zoomimg, vec2 despimg, vec2 pos, float zoom) {
+	vec2 uv = fragment(getVertexTexCoord());
+	uv -= 0.5;
+    uv.y *= iResolution.y/iResolution.x;
+	uv-=pos;
+    uv *= zoom;
+	
+    if (length(uv) > 1.0) return vec4(0.0,0.0,0.0,1.0);
+    uv = mix(uv,normalize(uv)*(2.0*asin(length(uv)) / 3.1415926),0.5);
+    vec3 n = vec3(uv, sqrt(1.0 - uv.x*uv.x - uv.y*uv.y));
+    uv = normalize(uv)*(zoomimg*asin(length(uv)) / 3.1415926);
+    
+	uv+=despimg;
+	lightvec = rotate(lightvec, despimg * vec2(1.,-iResolution.y/iResolution.x) * 3.1415926);
+	
+    float lit = mix(1.0, max(0.0, dot(n, normalize(lightvec))), 0.98);
+    lit += 0.3*pow(1.0 - max(0.0, n.z), 2.0);
+    lit = sqrt(lit);
+    
+    vec3 color = tex1.sample(uv + 0.5).rgb;
+    //vec3 fields = tex2.sample(uv * 2.0).rgb * 1.2;
+    //color = mix(color, fields, 0.5);
+    
+	return vec4(lit*color, 1.0);
+}

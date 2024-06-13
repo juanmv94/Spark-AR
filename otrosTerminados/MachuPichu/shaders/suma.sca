@@ -1,0 +1,82 @@
+float getv(std::Texture2d t, float divscr, float v) {
+	return t.sample(vec2(0., (v-0.5)/divscr+0.5)).x;
+}
+
+float main(std::Texture2d t, float divscr) {
+	return (
+		getv(t, divscr, 8./100.) +
+		getv(t, divscr, 9./100.) +
+		getv(t, divscr, 10./100.) +
+		getv(t, divscr, 11./100.) +
+		getv(t, divscr, 12./100.) +
+		getv(t, divscr, 13./100.) +
+		getv(t, divscr, 14./100.) +
+		getv(t, divscr, 15./100.) +
+		getv(t, divscr, 16./100.) +
+		getv(t, divscr, 17./100.) +
+		getv(t, divscr, 18./100.) +
+		getv(t, divscr, 19./100.) +
+		getv(t, divscr, 20./100.) +
+		getv(t, divscr, 21./100.) +
+		getv(t, divscr, 22./100.) +
+		getv(t, divscr, 23./100.) +
+		getv(t, divscr, 24./100.) +
+		getv(t, divscr, 25./100.) +
+		getv(t, divscr, 26./100.) +
+		getv(t, divscr, 27./100.) +
+		getv(t, divscr, 28./100.) +
+		getv(t, divscr, 29./100.) +
+		getv(t, divscr, 30./100.) +
+		getv(t, divscr, 31./100.) +
+		getv(t, divscr, 32./100.) +
+		getv(t, divscr, 33./100.) +
+		getv(t, divscr, 34./100.) +
+		getv(t, divscr, 35./100.) +
+		getv(t, divscr, 36./100.) +
+		getv(t, divscr, 37./100.) +
+		getv(t, divscr, 38./100.) +
+		getv(t, divscr, 39./100.) +
+		getv(t, divscr, 40./100.) +
+		getv(t, divscr, 41./100.) +
+		getv(t, divscr, 42./100.) +
+		getv(t, divscr, 43./100.) +
+		getv(t, divscr, 44./100.) +
+		getv(t, divscr, 45./100.) +
+		getv(t, divscr, 46./100.) +
+		getv(t, divscr, 47./100.) +
+		getv(t, divscr, 48./100.) +
+		getv(t, divscr, 49./100.) +
+		getv(t, divscr, 50./100.) +
+		getv(t, divscr, 51./100.) +
+		getv(t, divscr, 52./100.) +
+		getv(t, divscr, 53./100.) +
+		getv(t, divscr, 54./100.) +
+		getv(t, divscr, 55./100.) +
+		getv(t, divscr, 56./100.) +
+		getv(t, divscr, 57./100.) +
+		getv(t, divscr, 58./100.) +
+		getv(t, divscr, 59./100.) +
+		getv(t, divscr, 60./100.) +
+		getv(t, divscr, 61./100.) +
+		getv(t, divscr, 62./100.) +
+		getv(t, divscr, 63./100.) +
+		getv(t, divscr, 64./100.) +
+		getv(t, divscr, 65./100.) +
+		getv(t, divscr, 66./100.) +
+		getv(t, divscr, 67./100.) +
+		getv(t, divscr, 68./100.) +
+		getv(t, divscr, 69./100.) +
+		getv(t, divscr, 70./100.) +
+		getv(t, divscr, 71./100.) +
+		getv(t, divscr, 72./100.) +
+		getv(t, divscr, 73./100.) +
+		getv(t, divscr, 74./100.) +
+		getv(t, divscr, 75./100.) +
+		getv(t, divscr, 76./100.) +
+		getv(t, divscr, 77./100.) +
+		getv(t, divscr, 78./100.) +
+		getv(t, divscr, 79./100.) +
+		getv(t, divscr, 80./100.) +
+		getv(t, divscr, 81./100.) +
+		getv(t, divscr, 82./100.))/75.;
+}

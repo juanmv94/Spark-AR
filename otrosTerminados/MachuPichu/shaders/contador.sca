@@ -1,0 +1,13 @@
+vec4 main(std::Texture2d v, std::Texture2d ntex) {
+	vec2 uv = fragment(std::getVertexTexCoord());
+	float s = v.sample(vec2(0.)).x;
+	if (uv.x<0.5) {
+		vec2 dpos=uv-vec2(0., 0.);
+		vec2 desp=vec2(floor(s*10.0)/16.0,0);
+		return ntex.sample(dpos*0.125+desp);
+	} else {
+		vec2 dpos=uv-vec2(0.5, 0.);
+		vec2 desp=vec2(floor(mod(s*10.0,1.0)*10.0)/16.0,0);
+		return ntex.sample(dpos*0.125+desp);
+	}
+}

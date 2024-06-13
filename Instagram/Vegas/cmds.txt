@@ -1,0 +1,4 @@
+ffmpeg -i v.webm -vf crop=1180:2115:1500:0,scale=576:1024 -r 6 fr/f%03d.png
+ffmpeg -i fr/f%03d.png -c:v libwebp -quality 75 -vf boxblur=luma_power=0:alpha_power=1:alpha_radius=1 fr_/f%03d.webp
+ffmpeg -y -i a002.png -i a001.png -filter_complex "[1:v]alphaextract[alf];[0:v][alf]alphamerge" a002_.png
+ffmpeg -i a%03d.png -vf \"format=rgba,geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='min(min(alpha(X,Y),alpha(X-1,Y)),min(alpha(X+1,Y),alpha(X,Y-1)))'\" a%03d_.png

@@ -1,0 +1,15 @@
+using namespace std;
+
+vec4 main(Texture2d tex, vec2 iResolution, float speed, float intensity) {
+  vec2 q = fragment(getVertexTexCoord());
+  vec2 p = -1.0+2.0*q;
+	p.y *= - iResolution.y / iResolution.x;
+    vec3 col = vec3(0.0, 0.0, 0.0);
+	// Rain
+	vec2 st =  p * vec2(.5, .01)+getTime()*speed;
+    float f = floor(mod(getTime()/9., 2.0));
+	f = tex.sample(st).y * tex.sample(st*.773).x * 1.55;
+	f = clamp(pow(abs(f), 23.0) * 13.0, 0.0, q.y*intensity);
+	col += f;
+    return vec4(col, 1.0);
+}
